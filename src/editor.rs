@@ -25,7 +25,7 @@ pub struct Editor {
 impl Editor {
     pub fn run(&mut self) {
         Terminal::initialize().unwrap();
-        let result = self.repl();
+        let result: Result<(), Error> = self.repl();
         Terminal::terminate().unwrap();
         result.unwrap();
     }
@@ -36,7 +36,7 @@ impl Editor {
             if self.should_quit {
                 break;
             }
-            let event = read()?;
+            let event: Event = read()?;
             self.evaluate_event(&event)?;
         }
         Ok(())
@@ -103,6 +103,7 @@ impl Editor {
         }
         Ok(())
     }
+
     fn refresh_screen(&self) -> Result<(), Error> {
         Terminal::hide_caret()?;
         Terminal::move_caret_to(Position::default())?;
@@ -121,13 +122,14 @@ impl Editor {
         Terminal::execute()?;
         Ok(())
     }
+
     fn draw_welcome_message() -> Result<(), Error> {
         let mut welcome_message = format!("{NAME} editor -- version {VERSION}");
-        let width = Terminal::size()?.width;
-        let len = welcome_message.len();
+        let width: usize = Terminal::size()?.width;
+        let len: usize = welcome_message.len();
         // #[allow(clippy::integer_division)]
-        let padding = (width.saturating_sub(len)) / 2;
-        let spaces = " ".repeat(padding.saturating_sub(1));
+        let padding: usize = (width.saturating_sub(len)) / 2;
+        let spaces: String = " ".repeat(padding.saturating_sub(1));
         welcome_message = format!("~{spaces}{welcome_message}");
         welcome_message.truncate(width);
         Terminal::print(welcome_message)?;
